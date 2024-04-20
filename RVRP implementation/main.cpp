@@ -7,9 +7,9 @@
 #include "funcs.cpp"
 using namespace std;
 
+int dist[400][400];
 struct client
 {
-    int id;
     string city;
     string county;
     double latitude;
@@ -34,40 +34,35 @@ vector<string> split(const string &str, char delimiter)
 
 int main()
 {
-    vector<int> clients_of_agent[20];
+    //input clients
+    vector<client> agent[20];
     ifstream f("hackmk.csv");
     string line;
     client clients[400];
+    int clientNum = 0;
     while (getline(f, line))
     { // Read each line from the file
         // Split the line into fields
-        std::vector<std::string> fields = split(line, ',');
+        vector<string> fields = split(line, ',');
+        int i = stoi(fields[0]);
 
-        // Create a Location object and assign the fields
-        client location;
-        location.id = std::stoi(fields[0]);
-        location.city = fields[1];
-        location.county = fields[2];
-        location.latitude = std::stod(fields[3]);
-        location.longitude = std::stod(fields[4]);
-        location.sold = std::stol(fields[5]);
-        location.priority = fields[6];
-        location.agent = std::stoi(fields[7]);
-        location.frequency = fields[8];
-        clients[location.id] = location;
+        clients[i].city = fields[1];
+        clients[i].latitude = std::stod(fields[3]);
+        clients[i].longitude = std::stod(fields[4]);
+        clients[i].sold = std::stol(fields[5]);
+        clients[i].priority = fields[6];
+        clients[i].agent = std::stoi(fields[7]);
+        clients[i].frequency = fields[8];
 
-        clients_of_agent[location.agent].push_back(location.id);
 
-        // Do something with the location object, like printing it
-        // std::cout << "Location ID: " << location.id << std::endl;
-        // std::cout << "Name: " << location.city << std::endl;
-        // Print other fields...
-
-        // You can store the location object in a vector or process it otherwise
+        agent[clients[i].agent].push_back(clients[i]);
+        clientNum = i;
     }
+    clientNum++;
     f.close();
+
+    //input distance matrix of clients
     ifstream("output2.txt");
-    int dist[400][400];
     for (int i = 0; i < 400; i++)
     {
         for (int j = i; j < 400; j++)
@@ -78,9 +73,76 @@ int main()
             dist[j][i] = x;
         }
     }
+//     int distt[5][5] = {
+//     {0, 3, 2, 1, 4},
+//     {3, 0, 3, 1, 5},
+//     {2, 3, 0, 3, 1},
+//     {1, 1, 3, 0, 12},
+//     {4, 5, 1, 12, 0}};
+// int weight[5] = {0, 1, 3, 5, 3};
+// vector<int> temp = calculateBestPath(5,distt,weight);
+// cout<<temp.size()<<endl;
+// for(int i=0; i<temp.size(); i++){
+//     cout<<temp[i]<<" ";
+// }
 
+    //put in the clients in their correct week
+    vector<int> unorderedClients[3][4];
+    for(int i=0; i<clientNum; i++){
+        if(clients[i].frequency == "weekly"){
+            for(int monthNum = 0; monthNum<3; monthNum++){
+                for(int weekNum = 0; weekNum<4; weekNum++){
+                    unorderedClients[monthNum][weekNum].push_back(i);
+                }
+            }
+        }
+        if(clients[i].frequency == "twice-a-week"){
+            for(int monthNum = 0; monthNum<3; monthNum++){
+                for(int weekNum = 0; weekNum<4; weekNum++){
+                    unorderedClients[monthNum][weekNum].push_back(i);
+                    unorderedClients[monthNum][weekNum].push_back(i);
+                }
+            }
+        }
+        if(clients[i].frequency == "bi-weekly"){
+            for(int monthNum = 0; monthNum<3; monthNum++){
+                for(int weekNum = 0; weekNum<4; weekNum = weekNum + 2){
+                    unorderedClients[monthNum][weekNum].push_back(i);
+                }
+            }
+        }
+    }
+
+    //loop throught the agents
+    //to order its clients by date
     for (int agents = 0; agents < 20; agents++)
     {
+        //first we order by months
+        for(int monthNum = 0; monthNum < 3; monthNum++){
+            
+            //second we order by weeks
+            for(int weekNum = 0; weekNum<4; weekNum++){
+
+                //each day we have the solution vector day[i]
+                vector<int> days[4];
+                int nodeNum = unorderedClients[monthNum][weekNum].size();
+                int tempDis[nodeNum+1][nodeNum+1]; //add the fsega node
+
+                //calculate temporary distance matrix
+                for(int i=0; i<nodeNum; i++){
+                    for(int j=0; j<nodeNum; j++){
+                        tempDis[i][j] = dist[unorderedClients[monthNum][weekNum][i]]
+                                            [unorderedClients[monthNum][weekNum][j]];
+                    }
+                } 
+            }
+        }
+    }
+
+    return 0;
+}
+
+/*
         set<int> hetek[4];
         for (int i : clients_of_agent[agents])
         {
@@ -159,7 +221,4 @@ int main()
                 }
             }
         }
-    }
-
-    return 0;
-}
+*/
