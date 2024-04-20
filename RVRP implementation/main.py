@@ -1,6 +1,6 @@
 from ortools.linear_solver import pywraplp
 
-def solve_rvrp(clients, agents, distance_matrix, client_priorities, max_visits_per_day):
+def solve_rvrp(clients, agents, distance_matrix, client_priorities, max_visits_per_day, num_weeks):
     solver = pywraplp.Solver.CreateSolver('SCIP')
 
     # Define the number of days in a week
@@ -10,15 +10,17 @@ def solve_rvrp(clients, agents, distance_matrix, client_priorities, max_visits_p
     x = {}
     for agent in agents:
         for client in clients[agent]:
-            for day in range(1, num_days + 1):
-                x[(agent, client, day)] = solver.BoolVar(f'x_{agent}_{client}_{day}')
+            for week in range(1, num_weeks + 1):
+                for day in range(1, num_days + 1):
+                    x[(agent, client, week, day)] = solver.BoolVar(f'x_{agent}_{client}_{week}_{day}')
 
     # Objective function
     objective = solver.Objective()
     for agent in agents:
         for client in clients[agent]:
-            for day in range(1, num_days + 1):
-                objective.SetCoefficient(x[(agent, client, day)], client_priorities[client])
+            for week in range(1, num_weeks + 1):
+                for day in range(1, num_days + 1):
+                    objective.SetCoefficient(x[(agent, client, week, day)], client_priorities[client])
 
     objective.SetMaximization()
 
@@ -26,16 +28,19 @@ def solve_rvrp(clients, agents, distance_matrix, client_priorities, max_visits_p
     # Visit frequency constraints
     for agent in agents:
         for client in clients[agent]:
-            constraint_freq = solver.Constraint(0, visit_frequencies[client])
-            for day in range(1, num_days + 1):
-                constraint_freq.SetCoefficient(x[(agent, client, day)], 1)
+            total_visits_required = visit_frequencies[client] * num_weeks
+            constraint_freq = solver.Constraint(total_visits_required, total_visits_required)
+            for week in range(1, num_weeks + 1):
+                for day in range(1, num_days + 1):
+                    constraint_freq.SetCoefficient(x[(agent, client, week, day)], 1)
 
     # Agent workday constraints
     for agent in agents:
-        for day in range(1, num_days + 1):
-            constraint_max_visits = solver.Constraint(0, max_visits_per_day)
-            for client in clients[agent]:
-                constraint_max_visits.SetCoefficient(x[(agent, client, day)], 1)
+        for week in range(1, num_weeks + 1):
+            for day in range(1, num_days + 1):
+                constraint_max_visits = solver.Constraint(0, max_visits_per_day)
+                for client in clients[agent]:
+                    constraint_max_visits.SetCoefficient(x[(agent, client, week, day)], 1)
 
     # Solve the problem
     status = solver.Solve()
@@ -45,9 +50,12 @@ def solve_rvrp(clients, agents, distance_matrix, client_priorities, max_visits_p
         for agent in agents:
             print(f'Agent {agent}:')
             for client in clients[agent]:
-                for day in range(1, num_days + 1):
-                    if x[(agent, client, day)].solution_value() == 1:
-                        print(f' - Visit {client} on Day {day}')
+                print(f'  Client {client}:')
+                for week in range(1, num_weeks + 1):
+                    print(f'    Week {week}:')
+                    for day in range(1, num_days + 1):
+                        if x[(agent, client, week, day)].solution_value() == 1:
+                            print(f'      Visit on Day {day}')
     else:
         print('No solution found.')
 
@@ -65,6 +73,7 @@ distance_matrix = {
     ('Client2', 'Client3'): 8,
     ('Client3', 'Client1'): 12,
 }
+num_weeks = 12  # Number of weeks (3 months)
 
 # Solve the RVRP
-solve_rvrp(clients, agents, distance_matrix, client_priorities, max_visits_per_day)
+solve_rvrp(clients, agents, distance_matrix, client_priorities, max_visits_per_day, num_weeks)
