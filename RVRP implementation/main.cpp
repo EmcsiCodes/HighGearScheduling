@@ -37,7 +37,7 @@ int main()
 {
     //input clients
     vector<client> agent[20];
-    ifstream f("hackmk.csv");
+    ifstream f("test.csv");
     string line;
     client clients[400];
     int clientNum = 0;
@@ -141,7 +141,7 @@ int main()
                 //each day we have the solution vector day[i]
                 vector<int> days[4];
                 int nodeNum = unorderedClients[monthNum][weekNum].size() + 1;
-                float tempDis[nodeNum][nodeNum]; //add the fsega node
+                float tempDis[401][401]; //add the fsega node
                 int tempWeight[nodeNum];
 
                 //calculate temporary distance matrix
