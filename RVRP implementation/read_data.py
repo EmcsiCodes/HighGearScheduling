@@ -1,7 +1,7 @@
 import csv
 
 # Open the CSV file
-with open('hackmk.csv', 'r') as file:
+with open('test.csv', 'r') as file:
     # Create a CSV reader object
     reader = csv.reader(file)
     

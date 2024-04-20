@@ -5,7 +5,7 @@ from math import sin, cos, sqrt, atan2, radians
 coordinates = []
 R = 6373.0
 
-with open('output.txt', 'r') as file: #ide ird az input nevet!!!!
+with open('hack', 'r') as file: #ide ird az input nevet!!!!
     reader = csv.reader(file)
     for row in reader:
         # Split each row by space and append the resulting list to coordinates
