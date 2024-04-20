@@ -111,51 +111,98 @@ int main()
                 vector<int> best_path;
                 vector<int> path;
                 set<int> visited;
-                set<int> tovisit;
-                int weight[50];
+                vector<int> tovisit; // az a vector amibol kitorlom ha egyik napon megvizteli
+                int weight[50];      // hetek[week] hez kotheto prioritasok
 
-                tovisit = hetek[week];
-                for(int i=0;i<clients_of_agent[agents].size();i++)
+                for (int i : hetek[week]) // hetek[week] = azon a heten kiket kell megkezelni
                 {
-                    if(clients[clients_of_agent[agents][i]].priority == "LARGE")
-                    {
-                        weight[i+1] = 5;
-                    }
-                    else if(clients[clients_of_agent[agents][i]].priority == "MEDIUM")
-                    {
-                        weight[i+1] = 2;
-                    }
-                    else weight[i+1] = 1;
+                    tovisit.push_back(i);
                 }
-                weight[0] = 0; //fsega
 
                 int distance[100][100];
-
+                set<int> twiceaweek;
                 for (int day = 0; day < 4; day++)
                 {
                     // minden napra megy a grafos fuggveny
                     // ha twice a week akkor nem erase ha bent van az utban
                     // hetek[i] ben azok akiket a heten meg kell kezelni
+                    cout<<day<<endl;
+                    for(int i:tovisit)
+                    {
+                        cout<<i<<" ";
+                    }
+                    cout<<endl;
+                    for (int i = 0; i < tovisit.size(); i++)
+                    {
+                        if (clients[tovisit[i]].priority == "LARGE")
+                        {
+                            weight[i + 1] = 5;
+                        }
+                        else if (clients[tovisit[i]].priority == "MEDIUM")
+                        {
+                            weight[i + 1] = 2;
+                        }
+                        else
+                            weight[i + 1] = 1;
+                    }
+                    weight[0] = 0; // fsega
 
                     int n = tovisit.size() + 1;
-                    ifstream ()
-                    for(int i=0;i<n;i++)
+                    ifstream g("output3.txt");
+                    for (int i = 0; i < n; i++)
                     {
-                        distance[0][i] = 
-                    }
-
-                    for(int i=1;i<n;i++)
+                        g >> distance[0][i];
+                        distance[i][0] = distance[0][i];
+                    } // distances from fsega in row 0
+                    // tovisit vector contains ids of clients to visit today
+                    for (int i = 1; i < n; i++)
                     {
-                        for(int j=i;j<n;j++)
+                        for (int j = i; j < n; j++)
                         {
-                            distance[i][j] = 
-
+                            distance[i][j] = dist[tovisit[i]][tovisit[j]];
+                            distance[j][i] = dist[tovisit[i]][tovisit[j]];
                         }
                     }
 
-
                     findMaxWeightPath(0, path, 0, 0, best_path, 0, visited, tovisit.size(),
                                       weight, distance, 600);
+
+                    for (int i : twiceaweek)
+                    {
+                        for (auto it = tovisit.begin(); it != tovisit.end();)
+                        {
+                            if (*it == i)
+                            {
+                                it = tovisit.erase(it); // erase() returns the iterator to the next valid position
+                            }
+                            else
+                            {
+                                ++it; // Move to the next element
+                            }
+                        }
+                    }
+
+                    for (int i : best_path)
+                    {
+                        if (clients[i].frequency == "twice-a-week")
+                        {
+                            twiceaweek.insert(i);
+                        }
+                        else
+                        {
+                            for (auto it = tovisit.begin(); it != tovisit.end();)
+                            {
+                                if (*it == i)
+                                {
+                                    it = tovisit.erase(it); // erase() returns the iterator to the next valid position
+                                }
+                                else
+                                {
+                                    ++it; // Move to the next element
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

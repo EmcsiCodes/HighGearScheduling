@@ -3,8 +3,8 @@
 using namespace std;
 
 void findMaxWeightPath(int node, vector<int>& path, int currentWeight, 
-int currentTime, vector<int>& bestPath, int& maxWeight, 
-set<int>& visited, int nr_of_clients, int weight[], int dist[][400], int time_g) {
+int currentTime, vector<int>& bestPath, int maxWeight, 
+set<int>& visited, int nr_of_clients, int weight[], int dist[][100], int time_g) {
     // Mark the current node as visited
     visited.insert(node);
 
