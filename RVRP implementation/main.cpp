@@ -10,6 +10,7 @@ using namespace std;
 float dist[401][401];
 struct client
 {
+    int id;
     string city;
     string county;
     double latitude;
@@ -41,12 +42,13 @@ int main()
     string line;
     client clients[400];
     int clientNum = 0;
+    int agentNum = 1;
     while (getline(f, line))
     { // Read each line from the file
         // Split the line into fields
         vector<string> fields = split(line, ',');
         int i = stoi(fields[0]);
-
+        clients[i].id = i;
         clients[i].city = fields[1];
         clients[i].latitude = std::stod(fields[3]);
         clients[i].longitude = std::stod(fields[4]);
@@ -57,11 +59,10 @@ int main()
         if(clients[i].priority == "MEDIUM") clients[i].priorityi = 2;
         if(clients[i].priority == "SMALL") clients[i].priorityi = 1;
 
-        clients[i].agent = std::stoi(fields[7]);
+        int ii = std::stoi(fields[7]);
+        clients[i].agent = ii;
         clients[i].frequency = fields[8];
-
-
-        agent[clients[i].agent].push_back(clients[i]);
+        agent[ii].push_back(clients[i]);
         clientNum = i;
     }
     clientNum++;
@@ -101,37 +102,36 @@ int main()
 //     cout<<temp[i]<<" ";
 // }
 
-    //put in the clients in their correct week
-    vector<int> unorderedClients[3][4];
-    for(int i=0; i<clientNum; i++){
-        if(clients[i].frequency == "weekly"){
-            for(int monthNum = 0; monthNum<3; monthNum++){
-                for(int weekNum = 0; weekNum<4; weekNum++){
-                    unorderedClients[monthNum][weekNum].push_back(i);
-                }
-            }
-        }
-        if(clients[i].frequency == "twice-a-week"){
-            for(int monthNum = 0; monthNum<3; monthNum++){
-                for(int weekNum = 0; weekNum<4; weekNum++){
-                    unorderedClients[monthNum][weekNum].push_back(i);
-                    unorderedClients[monthNum][weekNum].push_back(i);
-                }
-            }
-        }
-        if(clients[i].frequency == "bi-weekly"){
-            for(int monthNum = 0; monthNum<3; monthNum++){
-                for(int weekNum = 0; weekNum<4; weekNum = weekNum + 2){
-                    unorderedClients[monthNum][weekNum].push_back(i);
-                }
-            }
-        }
-    }
+//iterate through the agents
+    for(int agenti = 0; agenti < agentNum; agenti++){
 
-    //loop throught the agents
-    //to order its clients by date
-    for (int agents = 0; agents < 20; agents++)
-    {
+        //put in the clients in their correct week
+        vector<int> unorderedClients[3][4];
+        for(client currClient : agent[agenti]){
+            if(currClient.frequency == "weekly"){
+                for(int monthNum = 0; monthNum<3; monthNum++){
+                    for(int weekNum = 0; weekNum<4; weekNum++){
+                        unorderedClients[monthNum][weekNum].push_back(currClient.id);
+                    }
+                }
+            }
+            if(currClient.frequency == "twice-a-week"){
+                for(int monthNum = 0; monthNum<3; monthNum++){
+                    for(int weekNum = 0; weekNum<4; weekNum++){
+                        unorderedClients[monthNum][weekNum].push_back(currClient.id);
+                        unorderedClients[monthNum][weekNum].push_back(currClient.id);
+                    }
+                }
+            }
+            if(currClient.frequency == "bi-weekly"){
+                for(int monthNum = 0; monthNum<3; monthNum++){
+                    for(int weekNum = 0; weekNum<4; weekNum = weekNum + 2){
+                        //ezt leellenorizni
+                        unorderedClients[monthNum][weekNum].push_back(currClient.id);
+                    }
+                }
+            }
+        }
         //first we order by months
         for(int monthNum = 0; monthNum < 3; monthNum++){
             
@@ -164,11 +164,27 @@ int main()
                     tempWeight[i] = 
                         clients[unorderedClients[monthNum][weekNum][i - 1]].priorityi;
                 }
-                days[0] = calculateBestPath(nodeNum,tempDis,tempWeight);
+
+                set<int> cantGo;
+                days[0] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
+                for(int i=0; i<days[0].size(); i++) if(days[0][i]!=0) cantGo.insert(days[0][i]);
+                days[1] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
+                for(int i=0; i<days[1].size(); i++) if(days[1][i]!=0) cantGo.insert(days[1][i]);
+                days[2] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
+                for(int i=0; i<days[2].size(); i++) if(days[2][i]!=0) cantGo.insert(days[2][i]);
+                days[3] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
+                for(int i=0; i<days[3].size(); i++) if(days[3][i]!=0) cantGo.insert(days[3][i]);
+
+                for(int i=0; i<4; i++){
+                    cout<<i+1<<": ";
+                    for(int j=0; j<days[i].size(); j++){
+                        cout<<days[i][j]<<" ";
+                    }
+                    cout<<endl;
+                } 
             }
         }
     }
-
     return 0;
 }
 
