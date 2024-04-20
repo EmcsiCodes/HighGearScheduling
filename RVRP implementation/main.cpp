@@ -56,8 +56,9 @@ int main()
         clients[i].priority = fields[6];
 
         if(clients[i].priority == "LARGE") clients[i].priorityi = 5;
-        if(clients[i].priority == "MEDIUM") clients[i].priorityi = 2;
-        if(clients[i].priority == "SMALL") clients[i].priorityi = 1;
+        else if(clients[i].priority == "MEDIUM") clients[i].priorityi = 2;
+        else if(clients[i].priority == "SMALL") clients[i].priorityi = 1;
+        else clients[i].priorityi = 0;
 
         int ii = std::stoi(fields[7]);
         clients[i].agent = ii;
@@ -88,19 +89,55 @@ int main()
             dist[i][j] = x;
             dist[j][i] = x;
         }
-    }
-//     int distt[5][5] = {
-//     {0, 3, 2, 1, 4},
-//     {3, 0, 3, 1, 5},
-//     {2, 3, 0, 3, 1},
-//     {1, 1, 3, 0, 12},
-//     {4, 5, 1, 12, 0}};
+    }    
+    //
+    
+
+    //
+//     float distt[401][401];
 // int weight[5] = {0, 1, 3, 5, 3};
-// vector<int> temp = calculateBestPath(5,distt,weight);
+// distt[0][0]=0;
+// distt[0][1] = distt[1][0] = 3;
+// distt[0][2] = dist[2][0] = 2;
+// distt[0][3] = distt[3][0] = 1;
+// distt[0][4] = distt[4][0] = 4;
+// distt[1][1] = 0;
+// distt[1][2] = distt[2][1] = 3;
+// distt[1][3] = dist[3][1] = 1;
+// distt[1][4] = distt[4][1] = 5;
+// distt[2][2] = 0;
+// distt[2][3] = distt[3][2] = 3;
+// distt[2][4] = distt[4][2] = 1;
+// distt[3][3] = 0;
+// distt[3][4] = distt[4][3] = 12;
+// set<int> cantGo;
+// vector<int> temp = calculateBestPath(5,distt,weight,cantGo);
 // cout<<temp.size()<<endl;
 // for(int i=0; i<temp.size(); i++){
 //     cout<<temp[i]<<" ";
 // }
+    //float distt[401][401];
+int weight[5] = {0, 1, 2, 5, 2};
+dist[0][0]=0;
+dist[0][1] = dist[1][0] = 5;
+dist[0][2] = dist[2][0] = 5;
+dist[0][3] = dist[3][0] = 1;
+dist[0][4] = dist[4][0] = 4;
+dist[1][1] = 0;
+dist[1][2] = dist[2][1] = 3;
+dist[1][3] = dist[3][1] = 1;
+dist[1][4] = dist[4][1] = 5;
+dist[2][2] = 0;
+dist[2][3] = dist[3][2] = 3;
+dist[2][4] = dist[4][2] = 1;
+dist[3][3] = 0;
+dist[3][4] = dist[4][3] = 12;
+set<int> cantGo;
+vector<int> temp = calculateBestPath(5,dist,weight,cantGo);
+cout<<temp.size()<<endl;
+for(int i=0; i<temp.size(); i++){
+    cout<<temp[i]<<" ";
+}
 
 //iterate through the agents
     for(int agenti = 0; agenti < agentNum; agenti++){
@@ -132,6 +169,13 @@ int main()
                 }
             }
         }
+        for(int i=0; i<4; i++){
+            cout<<"week "<<i<<": ";
+            for(int j : unorderedClients[0][i]){
+                cout<<j<<" ";
+            }
+            cout<<endl;
+        }
         //first we order by months
         for(int monthNum = 0; monthNum < 3; monthNum++){
             
@@ -140,7 +184,7 @@ int main()
 
                 //each day we have the solution vector day[i]
                 vector<int> days[4];
-                int nodeNum = unorderedClients[monthNum][weekNum].size() + 1;
+                int nodeNum = unorderedClients[monthNum][weekNum].size(); //+1
                 float tempDis[401][401]; //add the fsega node
                 int tempWeight[nodeNum];
 
@@ -152,36 +196,93 @@ int main()
                 }
                 for(int i=1; i<nodeNum; i++){
                     for(int j=i; j<nodeNum; j++){
-                        tempDis[i][j] = dist[unorderedClients[monthNum][weekNum][i - 1]]
+                        tempDis[j][i] = tempDis[i][j] = dist[unorderedClients[monthNum][weekNum][i - 1]]
                                             [unorderedClients[monthNum][weekNum][j - 1]];
-                        
                     }
                 }
+            //     cout<<nodeNum<<endl;
+            //    for(int i=0; i<nodeNum; i++){
+                
+            //         for(int j=0; j<nodeNum; j++){
+            //             cout<<dist[i][j]<<" ";
+            //         }
+            //         cout<<endl;
+            //     }
+            //     cout<<endl;
+            //     for(int i=0; i<nodeNum; i++){
+                
+            //         for(int j=0; j<nodeNum; j++){
+            //             cout<<tempDis[i][j]<<" ";
+            //         }
+            //         cout<<endl;
+            //     }
 
                 //calculate temprary weight array
                 tempWeight[0] = 0;
-                for(int i=1; i<nodeNum; i++){
+                for(int i=0; i<nodeNum; i++){
                     tempWeight[i] = 
-                        clients[unorderedClients[monthNum][weekNum][i - 1]].priorityi;
+                        clients[unorderedClients[monthNum][weekNum][i]].priorityi;//i - 1
                 }
 
-                set<int> cantGo;
-                days[0] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
-                for(int i=0; i<days[0].size(); i++) if(days[0][i]!=0) cantGo.insert(days[0][i]);
-                days[1] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
-                for(int i=0; i<days[1].size(); i++) if(days[1][i]!=0) cantGo.insert(days[1][i]);
-                days[2] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
-                for(int i=0; i<days[2].size(); i++) if(days[2][i]!=0) cantGo.insert(days[2][i]);
-                days[3] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
-                for(int i=0; i<days[3].size(); i++) if(days[3][i]!=0) cantGo.insert(days[3][i]);
+// for(int i=0; i<nodeNum; i++) cout<<tempWeight[i]<<" ";
+// cout<<endl;
 
-                for(int i=0; i<4; i++){
+                set<int> cantGo;
+                cout<<"week:"<<weekNum<<endl;
+                days[0] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
+                cout<<0<<endl;
+                                for(int i=0; i<4; i++){
                     cout<<i+1<<": ";
                     for(int j=0; j<days[i].size(); j++){
                         cout<<days[i][j]<<" ";
                     }
                     cout<<endl;
                 } 
+                cout<<endl;
+                for(int i=0; i<days[0].size(); i++) if(days[0][i]!=0) cantGo.insert(days[0][i]);
+                days[1] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
+                                cout<<1<<endl;
+                                for(int i=0; i<4; i++){
+                    cout<<i+1<<": ";
+                    for(int j=0; j<days[i].size(); j++){
+                        cout<<days[i][j]<<" ";
+                    }
+                    cout<<endl;
+                } 
+                cout<<endl;
+                for(int i=0; i<days[1].size(); i++) if(days[1][i]!=0) cantGo.insert(days[1][i]);
+                days[2] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
+                                cout<<2<<endl;
+                                for(int i=0; i<4; i++){
+                    cout<<i+1<<": ";
+                    for(int j=0; j<days[i].size(); j++){
+                        cout<<days[i][j]<<" ";
+                    }
+                    cout<<endl;
+                } 
+                cout<<endl;
+                for(int i=0; i<days[2].size(); i++) if(days[2][i]!=0) cantGo.insert(days[2][i]);
+                days[3] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
+                                cout<<3<<endl;
+                                for(int i=0; i<4; i++){
+                    cout<<i+1<<": ";
+                    for(int j=0; j<days[i].size(); j++){
+                        cout<<days[i][j]<<" ";
+                    }
+                    cout<<endl;
+                } 
+                cout<<endl;
+                for(int i=0; i<days[3].size(); i++) if(days[3][i]!=0) cantGo.insert(days[3][i]);
+
+                  cout<<4<<endl;
+                                for(int i=0; i<4; i++){
+                    cout<<i+1<<": ";
+                    for(int j=0; j<days[i].size(); j++){
+                        cout<<days[i][j]<<" ";
+                    }
+                    cout<<endl;
+                } 
+                cout<<endl;
             }
         }
     }

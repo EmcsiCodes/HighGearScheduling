@@ -4,12 +4,11 @@
 using namespace std;
 
 const int maxTime = 9;
-int bestWeight = 0;
-vector<int> bestPath;
 
 // Function to generate all possible paths under distance k using backtracking
 void generatePaths(int node, vector<int>& path,int totalDistance, 
-int totalWeight,int n,float dist[][401],int weight[],int lastweight,set<int> cantGo) {
+int totalWeight,int n,float dist[][401],int weight[],int lastweight,set<int> cantGo,
+int &bestWeight,vector<int> &bestPath) {
 
     path.push_back(node);
 
@@ -21,9 +20,11 @@ int totalWeight,int n,float dist[][401],int weight[],int lastweight,set<int> can
                     if(path[k] == i) found = true;
                 }
                 if(!found)generatePaths(i, path, totalDistance + dist[node][i], 
-                                        totalWeight + weight[i], n, dist, weight, weight[i], cantGo);
+                                        totalWeight + weight[i], n, dist, weight, 
+                                        weight[i], cantGo, bestWeight, bestPath);
                 else generatePaths(i, path, totalDistance + dist[node][i], 
-                                        totalWeight, n, dist, weight, 0, cantGo);
+                                        totalWeight, n, dist, weight, 0, cantGo,
+                                        bestWeight, bestPath);
             }
         }
     } else {
@@ -38,6 +39,9 @@ int totalWeight,int n,float dist[][401],int weight[],int lastweight,set<int> can
 
 vector<int> calculateBestPath(int n,float dist[][401],int weight[],set<int> cantGo){
     vector<int> path;
-    generatePaths(0,path,0,0,n,dist,weight,0,cantGo);
+    int bestWeight = 0;
+    vector<int> bestPath;
+    cout<<"in, set size="<<cantGo.size()<<endl;
+    generatePaths(0,path,0,0,n,dist,weight,0,cantGo,bestWeight,bestPath);
     return bestPath;
 }
