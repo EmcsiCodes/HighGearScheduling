@@ -4,7 +4,7 @@ def solve_rvrp(clients, agents, distance_matrix, client_priorities, max_visits_p
     solver = pywraplp.Solver.CreateSolver('SCIP')
 
     # Define the number of days in a week
-    num_days = 7
+    num_days = 4
 
     # Decision variables
     x = {}
@@ -65,10 +65,11 @@ clients = {
     'Agent2': ['Client2', 'Client3'],
 }
 agents = ['Agent1', 'Agent2']
-visit_frequencies = {'Client1': 2, 'Client2': 1, 'Client3': 1}  # Visits per week
+visit_frequencies = {'Client1': 2, 'Client2': 1, 'Client3': 0.5}  # Visits per week
 client_priorities = {'Client1': 5, 'Client2': 3, 'Client3': 2}
 max_visits_per_day = 6  # Maximum visits per day
 distance_matrix = {
+    ('Agent1', 'Client1'): 3,
     ('Client1', 'Client2'): 5,
     ('Client2', 'Client3'): 8,
     ('Client3', 'Client1'): 12,
