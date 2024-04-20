@@ -7,7 +7,7 @@
 #include "funcs.cpp"
 using namespace std;
 
-int dist[400][400];
+float dist[401][401];
 struct client
 {
     string city;
@@ -16,6 +16,7 @@ struct client
     double longitude;
     long sold;
     string priority;
+    int priorityi;
     int agent;
     string frequency;
 };
@@ -51,6 +52,11 @@ int main()
         clients[i].longitude = std::stod(fields[4]);
         clients[i].sold = std::stol(fields[5]);
         clients[i].priority = fields[6];
+
+        if(clients[i].priority == "LARGE") clients[i].priorityi = 5;
+        if(clients[i].priority == "MEDIUM") clients[i].priorityi = 2;
+        if(clients[i].priority == "SMALL") clients[i].priorityi = 1;
+
         clients[i].agent = std::stoi(fields[7]);
         clients[i].frequency = fields[8];
 
@@ -61,11 +67,20 @@ int main()
     clientNum++;
     f.close();
 
+    //input in distance matrix the initial position (fsega)
+    ifstream("output3.txt");
+    dist[0][0] = 0;
+    for(int i=1; i<401; i++){
+        float x; f >> x;
+        dist[0][i] = x;
+        dist[i][0] = x;
+    }
+
     //input distance matrix of clients
     ifstream("output2.txt");
-    for (int i = 0; i < 400; i++)
+    for (int i = 1; i < 401; i++)
     {
-        for (int j = i; j < 400; j++)
+        for (int j = i; j < 401; j++)
         {
             float x;
             f >> x;
@@ -125,16 +140,31 @@ int main()
 
                 //each day we have the solution vector day[i]
                 vector<int> days[4];
-                int nodeNum = unorderedClients[monthNum][weekNum].size();
-                int tempDis[nodeNum+1][nodeNum+1]; //add the fsega node
+                int nodeNum = unorderedClients[monthNum][weekNum].size() + 1;
+                float tempDis[nodeNum][nodeNum]; //add the fsega node
+                int tempWeight[nodeNum];
 
                 //calculate temporary distance matrix
+                tempDis[0][0] = 0;
                 for(int i=0; i<nodeNum; i++){
-                    for(int j=0; j<nodeNum; j++){
-                        tempDis[i][j] = dist[unorderedClients[monthNum][weekNum][i]]
-                                            [unorderedClients[monthNum][weekNum][j]];
+                    tempDis[i][0] = dist[i][0];
+                    tempDis[0][i] = dist[0][i];
+                }
+                for(int i=1; i<nodeNum; i++){
+                    for(int j=i; j<nodeNum; j++){
+                        tempDis[i][j] = dist[unorderedClients[monthNum][weekNum][i - 1]]
+                                            [unorderedClients[monthNum][weekNum][j - 1]];
+                        
                     }
-                } 
+                }
+
+                //calculate temprary weight array
+                tempWeight[0] = 0;
+                for(int i=1; i<nodeNum; i++){
+                    tempWeight[i] = 
+                        clients[unorderedClients[monthNum][weekNum][i - 1]].priorityi;
+                }
+                days[0] = calculateBestPath(nodeNum,tempDis,tempWeight);
             }
         }
     }
