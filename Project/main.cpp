@@ -8,7 +8,7 @@
 using namespace std;
 
 ifstream in_data("input.csv");
-ofstream out_data("output.txt");
+ofstream out_data("output.csv");
 #define inf 100000
 float dist[401][401];
 float tempDis[401][401]; //add the fsega node
@@ -52,7 +52,7 @@ int main()
     //input clients
     vector<client> agent[20];
     string line;
-    client clients[400];
+    client clients[401];
     int clientNum = 0;
     int agentNum = 20;
     getline(in_data,line); //first is initial position
@@ -64,6 +64,7 @@ int main()
         int i = stoi(fields[0]);
         clients[i].id = i;
         clients[i].city = fields[1];
+        clients[i].county = fields[2];
         clients[i].latitude = std::stod(fields[3]);
         clients[i].longitude = std::stod(fields[4]);
         clients[i].sold = std::stol(fields[5]);
@@ -159,9 +160,13 @@ int main()
                         days[dayNum][i] = unorderedClients[monthNum][weekNum][days[dayNum][i]];
                     }
                     int date = 5 + dayNum + weekNum * 7 + monthNum * 4 * 7;
+                    set<int> currClients;
                     for(int k : days[dayNum]){
                         if(k < 0 || k > 20) break;
-                        createOutput(clients[k],date);                        
+                        currClients.insert(k);                     
+                    }
+                    for(auto k : currClients){
+                        createOutput(clients[k],date);
                     }
                 }
             }
