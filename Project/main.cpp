@@ -156,7 +156,7 @@ int main()
                 for(int dayNum = 0; dayNum < 4; dayNum++){
                     days[dayNum] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
                     for(int i=0; i<days[dayNum].size(); i++) {
-                        if(days[dayNum][i]!=0) cantGo.insert(days[dayNum][i]);
+                        cantGo.insert(days[dayNum][i]);
                         //days[dayNum][i] = unorderedClients[monthNum][weekNum][days[dayNum][i]];
                     }
                     int date = 5 + dayNum + weekNum * 7 + monthNum * 4 * 7;
