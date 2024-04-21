@@ -159,9 +159,12 @@ int main()
                         days[dayNum][i] = unorderedClients[monthNum][weekNum][days[dayNum][i]];
                     }
                     int date = 5 + dayNum + weekNum * 7 + monthNum * 4 * 7;
+                    cout<<dayNum<<": ";
                     for(int k : days[dayNum]){
-                        createOutput(agent[agenti][0],date);                        
+                        if(k < 0 || k > 20) break;
+                        createOutput(clients[k],date);                        
                     }
+                    cout<<endl<<endl;
                 }
             }
         }
