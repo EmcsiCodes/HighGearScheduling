@@ -7,10 +7,13 @@
 #include "funcs.cpp"
 using namespace std;
 
+ifstream in_data("input.csv");
+ofstream out_data("output.txt");
 #define inf 100000
 float dist[401][401];
 float tempDis[401][401]; //add the fsega node
 int tempWeight[401];
+int mainDate = 5;
 struct client
 {
     int id;
@@ -24,6 +27,13 @@ struct client
     int agent;
     string frequency;
 };
+
+void createOutput(client currClient,int date){
+    out_data << currClient.id << "," << currClient.city << "," << currClient.county << ","
+    << currClient.latitude << "," << currClient.longitude << "," << currClient.sold << ","
+    << currClient.priority << "," << currClient.agent << "," << currClient.frequency << ","
+    << date <<endl;
+}
 
 vector<string> split(const string &str, char delimiter)
 {
@@ -41,14 +51,14 @@ int main()
 {
     //input clients
     vector<client> agent[20];
-    ifstream in_data("hackmk.csv");
     string line;
     client clients[400];
     int clientNum = 0;
     int agentNum = 20;
     getline(in_data,line); //first is initial position
     while (getline(in_data, line))
-    { // Read each line from the file
+    { 
+        // Read each line from the file
         // Split the line into fields
         vector<string> fields = split(line, ',');
         int i = stoi(fields[0]);
@@ -85,6 +95,7 @@ int main()
     for(int agenti = 0; agenti < agentNum; agenti++){
         if(agenti == 9) agenti ++;
         if(agenti == 18) agenti ++;
+
         //put in the clients in their correct week
         vector<int> unorderedClients[3][4];
         for(client currClient : agent[agenti]){
@@ -99,27 +110,18 @@ int main()
                 for(int monthNum = 0; monthNum<3; monthNum++){
                     for(int weekNum = 0; weekNum<4; weekNum++){
                         unorderedClients[monthNum][weekNum].push_back(currClient.id);
-                        //unorderedClients[monthNum][weekNum].push_back(currClient.id);
                     }
                 }
             }
             if(currClient.frequency == "bi-weekly"){
                 for(int monthNum = 0; monthNum<3; monthNum++){
                     for(int weekNum = 0; weekNum<4; weekNum = weekNum + 2){
-                        //ezt leellenorizni
                         unorderedClients[monthNum][weekNum].push_back(currClient.id);
                     }
                 }
             }
         }
-        for(int i=0; i<4; i++){
-            cout<<"week "<<i<<": ";
-            for(int j : unorderedClients[0][i]){
-                //cout<<j<<" ";
-            }
-            cout<<endl;
-        }
-        //first we order by months
+
         for(int monthNum = 0; monthNum < 3; monthNum++){
             
             //second we order by weeks
@@ -129,7 +131,7 @@ int main()
                 vector<int> days[4];
                 int nodeNum = unorderedClients[monthNum][weekNum].size() + 1;
 
-                //calculate temporary distance matrix
+                //calculate temporary distance matrix          
                 tempDis[0][0] = 0;
                 for(int i=1; i<nodeNum; i++){
                     tempDis[i][0] = tempDis[0][i] = dist[0][unorderedClients[monthNum][weekNum][i-1]];
@@ -139,46 +141,30 @@ int main()
                         tempDis[i][j] = tempDis[j][i] = dist[unorderedClients[monthNum][weekNum][i-1]]
                                                             [unorderedClients[monthNum][weekNum][j-1]];
                     }
-                }
-
+                }                     
+                    
                 //calculate temprary weight array
                 tempWeight[0] = 0;
                 for(int i=1; i<nodeNum; i++){
                     tempWeight[i] = 
                         clients[unorderedClients[monthNum][weekNum][i - 1]].priorityi;
-                }
+                }  
 
-                set<int> cantGo;
-                days[0] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
-                for(int i=0; i<days[0].size(); i++) {
-                    if(days[0][i]!=0) cantGo.insert(days[0][i]);
-                    days[0][i] = unorderedClients[monthNum][weekNum][days[0][i]];
-                }
-                cout<<endl;
-                days[1] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
-                for(int i=0; i<days[1].size(); i++) {
-                    if(days[1][i]!=0) cantGo.insert(days[1][i]);
-                    days[1][i] = unorderedClients[monthNum][weekNum][days[1][i]];
-                }
-                days[2] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
-                for(int i=0; i<days[2].size(); i++) {
-                    if(days[2][i]!=0) cantGo.insert(days[2][i]);
-                    days[2][i] = unorderedClients[monthNum][weekNum][days[2][i]];
-                }
-                days[3] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
-                for(int i=0; i<days[3].size(); i++) {
-                    if(days[3][i]!=0) cantGo.insert(days[3][i]);
-                    days[3][i] = unorderedClients[monthNum][weekNum][days[3][i]];
-                }
-                cout<<agenti<<" ";
-                for(int i=0; i<4; i++){
-                    cout<<"day:"<<i<<": ";
-                    for(int j:days[i]) cout<<j<<" ";
-                    cout<<endl;
+                //iterate throuht the 4 days.
+                set<int> cantGo;          
+                for(int dayNum = 0; dayNum < 4; dayNum++){
+                    days[dayNum] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
+                    for(int i=0; i<days[dayNum].size(); i++) {
+                        if(days[dayNum][i]!=0) cantGo.insert(days[dayNum][i]);
+                        days[dayNum][i] = unorderedClients[monthNum][weekNum][days[dayNum][i]];
+                    }
+                    int date = 5 + dayNum + weekNum * 7 + monthNum * 4 * 7;
+                    for(int k : days[dayNum]){
+                        createOutput(agent[agenti][0],date);                        
+                    }
                 }
             }
         }
     }
-    cout<<"YEEE";
     return 0;
 }

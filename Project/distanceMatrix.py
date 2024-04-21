@@ -42,7 +42,7 @@ def read_coordinates(in_file_path):
     return [(float(row['longitude']), float(row['latitude'])) for index, row in df.iterrows()]
 
 # Example usage
-in_file_path = 'hackmk.csv'  # Replace with your file path
+in_file_path = 'input.csv'  # Replace with your file path
 out_file_path = 'distanceMatrix.txt'
 
 def save_distance_matrix(matrix, file_path):
