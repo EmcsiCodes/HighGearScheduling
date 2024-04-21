@@ -157,16 +157,12 @@ int main()
                     days[dayNum] = calculateBestPath(nodeNum,tempDis,tempWeight,cantGo);
                     for(int i=0; i<days[dayNum].size(); i++) {
                         if(days[dayNum][i]!=0) cantGo.insert(days[dayNum][i]);
-                        days[dayNum][i] = unorderedClients[monthNum][weekNum][days[dayNum][i]];
+                        //days[dayNum][i] = unorderedClients[monthNum][weekNum][days[dayNum][i]];
                     }
                     int date = 5 + dayNum + weekNum * 7 + monthNum * 4 * 7;
-                    set<int> currClients;
                     for(int k : days[dayNum]){
                         if(k < 0 || k > 20) break;
-                        currClients.insert(k);                     
-                    }
-                    for(auto k : currClients){
-                        createOutput(clients[k],date);
+                            createOutput(clients[k],date);                 
                     }
                 }
             }
