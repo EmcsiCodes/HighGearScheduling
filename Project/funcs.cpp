@@ -3,7 +3,7 @@
 #include <set>
 using namespace std;
 
-const int maxTime = 300;
+const int maxTime = 200;
 
 // Function to generate all possible paths under distance k using backtracking
 void generatePaths(int node, vector<int>& path,int totalDistance, 
